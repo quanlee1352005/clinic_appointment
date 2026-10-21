@@ -330,7 +330,7 @@ app.post("/api/appointments", requirePatient, async (req, res) => {
       mysqlDateTime,
       note.trim() || null,
     ]);
-    const appointmentId = resultSets?.[0]?.appointment_id;
+    const appointmentId = resultSets?.[0]?.[0]?.appointment_id;
     if (!appointmentId) {
       throw new Error("The booking procedure did not return an appointment ID.");
     }

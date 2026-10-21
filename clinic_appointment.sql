@@ -1,4 +1,3 @@
-
 CREATE DATABASE IF NOT EXISTS clinic_appointment
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
@@ -177,7 +176,7 @@ BEGIN
 
     IF p_start_at IS NULL OR p_start_at <= CURRENT_TIMESTAMP THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Thoi diem hen phai nam trong tuong lai.';
+            SET MESSAGE_TEXT = 'Thời điểm hẹn phải nằm trong tương lai.';
     END IF;
 
     SET v_end_at = p_start_at;
@@ -192,7 +191,7 @@ BEGIN
     FOR UPDATE;
     IF v_locked_id IS NULL THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Bac si khong ton tai hoac dang ngung hoat dong.';
+            SET MESSAGE_TEXT = 'Bác sĩ không tồn tại hoặc đang ngừng hoạt động.';
     END IF;
 
     -- Khoa benh nhan de ngan dat chong lich cho cung mot benh nhan
@@ -204,7 +203,7 @@ BEGIN
     FOR UPDATE;
     IF v_locked_id IS NULL THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Benh nhan khong ton tai hoac dang ngung hoat dong.';
+            SET MESSAGE_TEXT = 'Bệnh nhân không tồn tại hoặc đang ngừng hoạt động.';
     END IF;
 
     SELECT ds.duration_minutes, ds.price, s.name
@@ -218,13 +217,13 @@ BEGIN
 
     IF v_duration IS NULL THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Dich vu khong ton tai hoac bac si khong cung cap dich vu nay.';
+            SET MESSAGE_TEXT = 'Dịch vụ không tồn tại hoặc bác sĩ không cung cấp dịch vụ này.';
     END IF;
 
     SET v_end_at = DATE_ADD(p_start_at, INTERVAL v_duration MINUTE);
     IF DATE(p_start_at) <> DATE(v_end_at) THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Lich hen khong duoc keo dai qua ngay hom sau.';
+            SET MESSAGE_TEXT = 'Lịch hẹn không được kéo dài qua ngày hôm sau.';
     END IF;
 
     SELECT COUNT(*) INTO v_count
@@ -236,7 +235,7 @@ BEGIN
       AND end_time >= TIME(v_end_at);
     IF v_count = 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Thoi gian hen nam ngoai lich lam viec cua bac si.';
+            SET MESSAGE_TEXT = 'Thời gian hẹn nằm ngoài lịch làm việc của bác sĩ.';
     END IF;
 
     SELECT COUNT(*) INTO v_count
@@ -245,7 +244,7 @@ BEGIN
       AND off_date = DATE(p_start_at);
     IF v_count > 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Bac si nghi vao ngay duoc chon.';
+            SET MESSAGE_TEXT = 'Bác sĩ nghỉ vào ngày được chọn.';
     END IF;
 
     SELECT COUNT(*) INTO v_count
@@ -256,7 +255,7 @@ BEGIN
       AND end_at > p_start_at;
     IF v_count > 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Bac si da co lich hen trung thoi gian.';
+            SET MESSAGE_TEXT = 'Bác sĩ đã có lịch hẹn trùng thời gian.';
     END IF;
 
     SELECT COUNT(*) INTO v_count
@@ -267,7 +266,7 @@ BEGIN
       AND end_at > p_start_at;
     IF v_count > 0 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'Benh nhan da co lich hen trung thoi gian.';
+            SET MESSAGE_TEXT = 'Bệnh nhân đã có lịch hẹn trùng thời gian.';
     END IF;
 
     INSERT INTO appointments (
@@ -287,26 +286,25 @@ DELIMITER ;
 
 -- Du lieu mau de thuc hanh (khong chua thong tin ca nhan that).
 INSERT IGNORE INTO specialties (specialty_id, name, description) VALUES
-    (1, 'Noi tong quat', 'Kham va tu van cac van de noi khoa'),
-    (2, 'Da lieu', 'Kham va tu van cac benh ve da');
+    (1, 'Nội tổng quát', 'Khám và tư vấn các vấn đề nội khoa'),
+    (2, 'Da liễu', 'Khám và tư vấn các bệnh về da');
 
 INSERT IGNORE INTO patients
     (patient_id, full_name, date_of_birth, gender, phone, email) VALUES
-    (1, 'Nguyen Van Mau', '1998-05-20', 'male', '0900000001', 'patient@example.test');
+    (1, 'Nguyễn Văn Mẫu', '1998-05-20', 'male', '0900000001', 'patient@example.test');
 
 INSERT IGNORE INTO doctors
     (doctor_id, specialty_id, full_name, phone, email, biography) VALUES
-    (1, 1, 'Bac si Mau 1', '0900000011', 'doctor1@example.test', 'Bac si noi tong quat'),
-    (2, 2, 'Bac si Mau 2', '0900000012', 'doctor2@example.test', 'Bac si da lieu');
+    (1, 1, 'Bác sĩ Mẫu 1', '0900000011', 'doctor1@example.test', 'Bác sĩ nội tổng quát'),
+    (2, 2, 'Bác sĩ Mẫu 2', '0900000012', 'doctor2@example.test', 'Bác sĩ da liễu');
 
 INSERT IGNORE INTO services (service_id, name, description) VALUES
-    (1, 'Kham tong quat', 'Kham suc khoe tong quat'),
-    (2, 'Tu van da lieu', 'Tu van va kham cac van de ve da');
+    (1, 'Khám tổng quát', 'Khám sức khỏe tổng quát'),
+    (2, 'Tư vấn da liễu', 'Tư vấn và khám các vấn đề về da');
 
 INSERT IGNORE INTO doctor_services
     (doctor_id, service_id, duration_minutes, price) VALUES
     (1, 1, 30, 250000.00),
-    (1, 2, 45, 350000.00),
     (2, 2, 30, 300000.00);
 
 INSERT IGNORE INTO doctor_schedules
