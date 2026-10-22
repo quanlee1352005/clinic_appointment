@@ -7,7 +7,8 @@
     "dev": "concurrently -k \"npm:server\" \"npm:client\"",
     "server": "node server/index.js",
     "client": "vite --host 0.0.0.0",
-    "build": "vite build"
+    "build": "vite build",
+    "create-staff": "node server/create-staff.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

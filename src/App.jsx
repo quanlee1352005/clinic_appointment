@@ -1,48 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
-const money = new Intl.NumberFormat("vi-VN", {
-  style: "currency",
-  currency: "VND",
-  maximumFractionDigits: 0,
-});
-
-const statusLabels = {
-  pending: "Chờ xác nhận",
-  confirmed: "Đã xác nhận",
-  completed: "Đã hoàn thành",
-  cancelled: "Đã hủy",
-  no_show: "Không đến",
-};
-
-const today = () => {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 10);
-};
-
-function dateTime(value) {
-  return new Date(String(value).replace(" ", "T"));
-}
-
-async function request(path, options = {}) {
-  const response = await fetch(path, {
-    credentials: "same-origin",
-    ...options,
-    headers: {
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      ...options.headers,
-    },
-  });
-  if (response.status === 204) return null;
-  const data = await response.json();
-  if (!response.ok) {
-    const error = new Error(data.error || "Đã xảy ra lỗi. Vui lòng thử lại.");
-    error.status = response.status;
-    throw error;
-  }
-  return data;
-}
+import Consultation from "./Consultation.jsx";
+import Staff from "./Staff.jsx";
+import { dateTime, money, request, statusLabels, today } from "./api.js";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -51,6 +11,7 @@ function App() {
   const [page, setPage] = useState("home");
   const [authMode, setAuthMode] = useState("login");
   const [afterAuth, setAfterAuth] = useState("appointments");
+  const [staffMode, setStaffMode] = useState(window.location.hash === "#staff");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -80,6 +41,12 @@ function App() {
           if (authError.status !== 401) setError(authError.message);
         }),
     ]).finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => setStaffMode(window.location.hash === "#staff");
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
   useEffect(() => {
@@ -127,6 +94,18 @@ function App() {
     setBooking({ serviceId: String(serviceId || ""), doctorId: "", startAt: "", note: "" });
     if (!user) return openAuth("login", "booking");
     setPage("booking");
+  }
+
+  function openConsult() {
+    setError("");
+    setNotice("");
+    if (!user) return openAuth("login", "consult");
+    setPage("consult");
+  }
+
+  function leaveStaff() {
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    setStaffMode(false);
   }
 
   async function submitAuth(event) {
@@ -203,6 +182,8 @@ function App() {
     }
   }
 
+  if (staffMode) return <Staff onExit={leaveStaff} />;
+
   return (
     <div className="site">
       <header className="site-header">
@@ -213,6 +194,7 @@ function App() {
         <nav className="main-nav" aria-label="Điều hướng chính">
           <button className={page === "home" ? "nav-item selected" : "nav-item"} onClick={() => setPage("home")}>Trang chủ</button>
           <a className="nav-item" href="#services" onClick={() => setPage("home")}>Dịch vụ</a>
+          <button className={page === "consult" ? "nav-item selected" : "nav-item"} onClick={openConsult}>Tư vấn trực tuyến</button>
           {user && <button className={page === "appointments" ? "nav-item selected" : "nav-item"} onClick={() => setPage("appointments")}>Lịch hẹn của tôi</button>}
         </nav>
         <div className="header-account">
@@ -286,6 +268,11 @@ function App() {
               )}
             </section>
 
+            <section className="consult-promo">
+              <div><span className="eyebrow">TƯ VẤN TRỰC TUYẾN</span><h2>Có thắc mắc? Hỏi trực tiếp phòng khám.</h2><p>Gửi câu hỏi và nhận phản hồi từ nhân viên phòng khám — do người thật trả lời, không dùng AI.</p></div>
+              <button className="button button-outline" onClick={openConsult}>Gửi câu hỏi <span>→</span></button>
+            </section>
+
             <section className="closing-cta">
               <div><span className="eyebrow">BẠN ĐÃ SẴN SÀNG?</span><h2>Bắt đầu chăm sóc sức khỏe<br />từ một cuộc hẹn.</h2></div>
               <button className="button button-light" onClick={() => openBooking()}>Đặt lịch khám <span>→</span></button>
@@ -353,6 +340,8 @@ function App() {
           </section>
         )}
 
+        {page === "consult" && user && <Consultation />}
+
         {page === "appointments" && user && (
           <section className="account-section">
             <div className="account-heading"><div><span className="eyebrow">KHÔNG GIAN CỦA BẠN</span><h1>Lịch hẹn của tôi</h1><p>Xin chào {user.fullName}, các lịch bên dưới chỉ hiển thị trong tài khoản của bạn.</p></div><button className="button button-primary" onClick={() => openBooking()}>+ Đặt lịch mới</button></div>
@@ -366,7 +355,7 @@ function App() {
                 {visibleAppointments.map((item) => (
                   <article className="appointment-card" key={item.appointmentId}>
                     <div className="appointment-date"><span>{dateTime(item.startAt).toLocaleDateString("vi-VN", { day: "2-digit" })}</span><small>{dateTime(item.startAt).toLocaleDateString("vi-VN", { month: "short", year: "numeric" })}</small></div>
-                    <div className="appointment-main"><div className="appointment-title"><h3>{item.serviceName}</h3><span className={`status status-${item.status}`}>{statusLabels[item.status] || item.status}</span></div><p>{item.specialty} <span>·</span> {item.doctorName}</p><div className="appointment-details"><span>◷ {dateTime(item.startAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span><span>⌑ Mã lịch #{item.appointmentId}</span><b>{money.format(Number(item.price))}</b></div></div>
+                    <div className="appointment-main"><div className="appointment-title"><h3>{item.serviceName}</h3><span className={`status status-${item.status}`}>{statusLabels[item.status] || item.status}</span></div><p>{item.specialty} <span>·</span> {item.doctorName}</p><div className="appointment-details"><span>◷ {dateTime(item.startAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span><span>⌑ Mã lịch #{item.appointmentId}</span><b>{money.format(Number(item.price))}</b></div>{item.staffNote && <p className="staff-note">Phòng khám: {item.staffNote}</p>}</div>
                     {["pending", "confirmed"].includes(item.status) && dateTime(item.startAt) > new Date() && <button className="cancel-button" disabled={busy} onClick={() => cancelAppointment(item.appointmentId)}>Hủy lịch</button>}
                   </article>
                 ))}
@@ -376,8 +365,8 @@ function App() {
         )}
       </main>
 
-      <footer className="site-footer"><a className="brand footer-brand" href="#" onClick={(event) => { event.preventDefault(); setPage("home"); }}><span className="brand-symbol"><span>+</span></span><span className="brand-name">an tâm<small>PHÒNG KHÁM ĐA KHOA</small></span></a><span>Chăm sóc tận tâm · Sức khỏe vẹn toàn</span><span>© 2026 An Tâm</span></footer>
-      {notice && page !== "appointments" && page !== "booking" && <div className="toast" role="status">{notice}</div>}
+      <footer className="site-footer"><a className="brand footer-brand" href="#" onClick={(event) => { event.preventDefault(); setPage("home"); }}><span className="brand-symbol"><span>+</span></span><span className="brand-name">an tâm<small>PHÒNG KHÁM ĐA KHOA</small></span></a><span>Chăm sóc tận tâm · Sức khỏe vẹn toàn</span><span>© 2026 An Tâm · <a className="staff-link" href="#staff">Dành cho nhân viên</a></span></footer>
+      {notice && !["appointments", "booking", "consult"].includes(page) && <div className="toast" role="status">{notice}</div>}
     </div>
   );
 }

@@ -1,108 +1,32 @@
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import express from "express";
 import bcrypt from "bcryptjs";
-import { rateLimit } from "express-rate-limit";
 import "dotenv/config";
 import { pool } from "./db.js";
+import {
+  authLimiter,
+  clearSessionCookie,
+  emailPattern,
+  hashToken,
+  parseSessionToken,
+  publicUser,
+  requirePatient,
+  sessionLifetimeSeconds,
+  setSessionCookie,
+} from "./auth.js";
+import { patientConsultationsRouter } from "./consultations.js";
+import { staffRouter } from "./staff.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 3001);
-const sessionCookie = "clinic_session";
-const sessionLifetimeSeconds = 7 * 24 * 60 * 60;
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const dummyPasswordHash = bcrypt.hashSync(randomBytes(32).toString("hex"), 12);
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "20kb" }));
-app.use(["/api/auth", "/api/appointments"], (_req, res, next) => {
+app.use(["/api/auth", "/api/appointments", "/api/consultations", "/api/staff"], (_req, res, next) => {
   res.setHeader("Cache-Control", "no-store");
   next();
 });
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  standardHeaders: "draft-7",
-  legacyHeaders: false,
-  message: { error: "Bạn thử quá nhiều lần. Vui lòng đợi 15 phút rồi thử lại." },
-});
-
-function parseSessionToken(req) {
-  const rawCookie = req.headers.cookie;
-  if (!rawCookie) return null;
-
-  const cookiePart = rawCookie
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${sessionCookie}=`));
-  if (!cookiePart) return null;
-
-  try {
-    return decodeURIComponent(cookiePart.slice(sessionCookie.length + 1));
-  } catch {
-    return null;
-  }
-}
-
-function hashToken(token) {
-  return createHash("sha256").update(token).digest("hex");
-}
-
-function setSessionCookie(res, token) {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  res.setHeader(
-    "Set-Cookie",
-    `${sessionCookie}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${sessionLifetimeSeconds}${secure}`,
-  );
-}
-
-function clearSessionCookie(res) {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  res.setHeader(
-    "Set-Cookie",
-    `${sessionCookie}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`,
-  );
-}
-
-function publicUser(row) {
-  return {
-    accountId: row.accountId,
-    patientId: row.patientId,
-    fullName: row.fullName,
-    phone: row.phone,
-    email: row.email,
-  };
-}
-
-async function requirePatient(req, res, next) {
-  const token = parseSessionToken(req);
-  if (!token || token.length > 100) {
-    return res.status(401).json({ error: "Vui lòng đăng nhập để tiếp tục." });
-  }
-
-  try {
-    const [rows] = await pool.execute(
-      `SELECT a.account_id AS accountId, p.patient_id AS patientId,
-              p.full_name AS fullName, p.phone, a.email
-       FROM login_sessions AS s
-       JOIN patient_accounts AS a ON a.account_id = s.account_id
-       JOIN patients AS p ON p.patient_id = a.patient_id
-       WHERE s.token_hash = ?
-         AND s.expires_at > CURRENT_TIMESTAMP
-         AND p.is_active = TRUE`,
-      [hashToken(token)],
-    );
-    if (rows.length === 0) {
-      clearSessionCookie(res);
-      return res.status(401).json({ error: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." });
-    }
-    req.user = publicUser(rows[0]);
-    return next();
-  } catch (error) {
-    console.error("Session validation failed:", error.message);
-    return res.status(500).json({ error: "Không xác thực được phiên đăng nhập." });
-  }
-}
 
 app.get("/api/health", async (_req, res) => {
   try {
@@ -288,7 +212,7 @@ app.get("/api/appointments", requirePatient, async (req, res) => {
     const [rows] = await pool.execute(
       `SELECT a.appointment_id AS appointmentId, a.start_at AS startAt,
               a.end_at AS endAt, a.status, a.patient_note AS patientNote,
-              a.service_name_snapshot AS serviceName, a.price_snapshot AS price,
+              a.staff_note AS staffNote, a.service_name_snapshot AS serviceName, a.price_snapshot AS price,
               d.full_name AS doctorName, sp.name AS specialty
        FROM appointments AS a
        JOIN doctors AS d ON d.doctor_id = a.doctor_id
@@ -377,6 +301,9 @@ app.patch("/api/appointments/:id/cancel", requirePatient, async (req, res) => {
     res.status(500).json({ error: "Không hủy được lịch hẹn." });
   }
 });
+
+app.use("/api/consultations", requirePatient, patientConsultationsRouter);
+app.use("/api/staff", staffRouter);
 
 app.use((error, _req, res, _next) => {
   console.error("Unhandled request error:", error);

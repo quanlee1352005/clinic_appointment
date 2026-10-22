@@ -309,3 +309,76 @@ main { min-height: calc(100vh - 154px); }
   .appointment-details b { width: 100%; margin: 0; }
   .cancel-button { padding: 6px; }
 }
+
+/* ---------- Tư vấn trực tuyến & khu vực nhân viên ---------- */
+.alert.info { border: 1px solid #d3e3ec; color: #3d6277; background: #f0f7fb; }
+.alert.warn { border: 1px solid #ecdcae; color: #7c5d16; background: #fff8e6; }
+.consult-promo { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: min(1050px, 88%); margin: 0 auto 60px; padding: 28px 32px; border: 1px solid #dfe9e2; border-radius: 6px; background: #f6faf6; }
+.consult-promo h2 { margin: 8px 0 6px; color: #294638; font: 800 22px Manrope; letter-spacing: -.5px; }
+.consult-promo p { margin: 0; color: #7c8d85; font-size: 11px; line-height: 1.7; }
+.staff-link { color: inherit; text-decoration: underline; }
+.staff-note { margin: 8px 0 0; padding: 7px 10px; border-radius: 4px; color: #6f5a2a; background: #fff8e6; font-size: 9px; line-height: 1.5; }
+.badge { margin-left: 6px; min-width: 17px; padding: 2px 5px; border-radius: 10px; color: #fff; background: #d17c69; font-size: 8px; font-weight: 700; text-align: center; }
+.consult-layout { display: grid; grid-template-columns: 320px 1fr; gap: 18px; align-items: start; margin-top: 16px; }
+.consult-list { display: flex; flex-direction: column; gap: 8px; max-height: 620px; overflow-y: auto; }
+.consult-item { display: flex; flex-direction: column; gap: 5px; padding: 12px 13px; border: 1px solid #e8ede9; border-radius: 5px; background: #fff; text-align: left; color: var(--ink); }
+.consult-item:hover { border-color: #b9d2c0; }
+.consult-item.active { border-color: #7fb092; background: #f3f9f4; }
+.consult-item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.consult-item-top b { font: 700 11px Manrope; line-height: 1.4; }
+.consult-item small { color: #8b9890; font-size: 8px; }
+.consult-snippet { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #6f8077; font-size: 9px; line-height: 1.5; }
+.status.consult-open { color: #936b23; background: #fff4dc; }
+.status.consult-answered { color: #347252; background: #eaf4e9; }
+.status.consult-closed { color: #8a948e; background: #f0f2f0; }
+.status.status-late { color: #8f4236; background: #fdeeea; }
+.consult-panel { min-height: 360px; padding: 20px; border: 1px solid #e8ede9; border-radius: 5px; background: #fff; }
+.consult-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid #edf0ed; }
+.consult-head h3 { margin: 0 0 4px; color: #2f4a3c; font: 800 14px Manrope; }
+.consult-head small { color: #8b9890; font-size: 9px; }
+.chat-thread { display: flex; flex-direction: column; gap: 11px; max-height: 380px; min-height: 160px; overflow-y: auto; padding: 16px 4px; }
+.chat-msg { max-width: 78%; padding: 10px 13px; border-radius: 10px; font-size: 10px; line-height: 1.65; }
+.chat-msg p { margin: 4px 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat-msg small { color: #98a39b; font-size: 8px; }
+.chat-author { color: #59896e; font-size: 8px; font-weight: 700; }
+.chat-msg.mine { align-self: flex-end; border-bottom-right-radius: 3px; background: #e8f3ea; }
+.chat-msg.theirs { align-self: flex-start; border-bottom-left-radius: 3px; background: #f4f6f4; }
+.chat-form { display: flex; align-items: flex-end; gap: 10px; padding-top: 12px; border-top: 1px solid #edf0ed; }
+.chat-form textarea { flex: 1; padding: 10px 11px; border: 1px solid #dfe7e0; border-radius: 4px; outline: none; resize: vertical; color: #354d40; font-size: 10px; }
+.chat-form textarea:focus { border-color: #81a88b; box-shadow: 0 0 0 3px #eff5ef; }
+.staff-site { background: #fafcfa; }
+.staff-loading { padding: 60px; text-align: center; }
+.staff-login { display: grid; place-items: center; min-height: 100vh; padding: 30px 0; }
+.staff-section { max-width: 1120px; }
+.staff-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin-bottom: 8px; }
+.staff-filters .field { min-width: 170px; }
+.staff-card { align-items: flex-start; }
+.patient-line { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; color: #6f8077; font-size: 9px; }
+.patient-line b { color: #3a5545; }
+.note-line { margin: 0 0 6px; color: #7d8c82; font-size: 9px; line-height: 1.5; }
+.note-line.staff { color: #6f5a2a; }
+.staff-actions { display: flex; flex-direction: column; gap: 7px; align-items: stretch; min-width: 108px; }
+.reason-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.reason-form input { flex: 1; min-width: 190px; height: 34px; padding: 0 10px; border: 1px solid #dfe7e0; border-radius: 4px; outline: none; font-size: 10px; }
+.button-text-small { padding: 6px; border: 0; color: #7c8d85; background: none; font-size: 9px; }
+.schedule-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; }
+.schedule-card { padding: 20px; border: 1px solid #e8ede9; border-radius: 5px; background: #fff; }
+.schedule-card h3 { margin: 0 0 4px; color: #2f4a3c; font: 800 14px Manrope; }
+.muted { margin: 0 0 12px; color: #8b9890; font-size: 9px; line-height: 1.6; }
+.day-block { display: grid; grid-template-columns: 78px 1fr; gap: 10px; align-items: start; padding: 9px 0; border-top: 1px solid #f0f3f0; font-size: 10px; }
+.day-block > b { color: #3a5545; font-size: 10px; padding-top: 9px; }
+.day-block .muted { margin: 0; padding-top: 9px; }
+.slot-row { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 6px; }
+.slot-row.off input { opacity: .5; }
+.slot-row input, .add-form input, .add-form select { height: 34px; padding: 0 8px; border: 1px solid #dfe7e0; border-radius: 4px; outline: none; color: #354d40; background: #fff; font-size: 10px; }
+.add-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed #dfe7e0; }
+.add-form input[placeholder] { flex: 1; min-width: 150px; }
+.off-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid #f0f3f0; font-size: 10px; }
+.off-row b { flex: 0 0 auto; color: #3a5545; }
+.off-row span { flex: 1; color: #7d8c82; }
+@media (max-width: 860px) {
+  .consult-layout, .schedule-grid { grid-template-columns: 1fr; }
+  .consult-promo { flex-direction: column; align-items: flex-start; }
+  .staff-card { flex-wrap: wrap; }
+  .staff-actions { flex-direction: row; flex-wrap: wrap; }
+}
