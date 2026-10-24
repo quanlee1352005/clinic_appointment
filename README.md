@@ -14,8 +14,7 @@ và trả lời tư vấn.
   7 ngày. Cookie tự bật `Secure` khi chạy với `NODE_ENV=production`.
 - Đặt lịch sau khi đăng nhập; máy chủ xác minh giờ làm, ngày nghỉ và xung đột.
 - “Lịch hẹn của tôi”: xem trạng thái, thấy lý do nếu phòng khám từ chối/hủy, tự hủy lịch sắp tới.
-- **Tư vấn trực tuyến**: gửi câu hỏi, nhận phản hồi và nhắn tiếp với nhân viên phòng khám
-  (người thật trả lời, **không dùng AI**); trang tự làm mới 8 giây/lần.
+- **Tư vấn trực tuyến**: gửi câu hỏi, nhận phản hồi và nhắn tiếp với nhân viên phòng khám ; trang tự làm mới 8 giây/lần.
 
 **Nhân viên phòng khám** (vào bằng `http://localhost:5173/#staff` hoặc liên kết “Dành cho nhân viên” ở chân trang)
 - Tài khoản, phiên và cookie riêng, tách hoàn toàn khỏi bệnh nhân (phiên 12 giờ).
@@ -33,8 +32,7 @@ và trả lời tư vấn.
 
 ## Cài đặt mới
 
-1. Chạy toàn bộ [clinic_appointment.sql](./clinic_appointment.sql) trong MySQL
-   Workbench/phpMyAdmin. Script tạo database, bảng, procedure và dữ liệu dịch vụ mẫu.
+1. Chạy toàn bộ [clinic_appointment.sql](./clinic_appointment.sql) trong phpMyAdmin. Script tạo database, bảng, procedure và dữ liệu dịch vụ mẫu.
 2. Sao chép `.env.example` thành `.env`, sau đó cấu hình MySQL:
 
    ```env
@@ -59,16 +57,6 @@ và trả lời tư vấn.
 4. Mở `http://localhost:5173`, chọn **Tạo tài khoản** để dùng với tư cách bệnh nhân;
    mở `http://localhost:5173/#staff` để đăng nhập nhân viên. API health check ở
    `http://localhost:3001/api/health`.
-
-## Nâng cấp database đã tạo trước đó
-
-Không cần xóa database hoặc lịch hẹn. Chạy **lần lượt, mỗi file một lần**:
-
-1. [migrations/001_patient_accounts.sql](./migrations/001_patient_accounts.sql) — nếu database
-   chưa có bảng `patient_accounts`/`login_sessions`.
-2. [migrations/002_staff_and_consultations.sql](./migrations/002_staff_and_consultations.sql) — thêm
-   tài khoản nhân viên, cột xử lý lịch (`staff_note`, `handled_by_staff_id`, `handled_at`) và hai bảng
-   tư vấn. Nếu báo `Duplicate column name` nghĩa là đã chạy rồi.
 
 Sau đó tạo tài khoản nhân viên bằng `npm run create-staff` như trên. Dữ liệu lịch hẹn cũ được giữ nguyên.
 
@@ -120,6 +108,4 @@ User Story, sơ đồ CSDL và quy tắc xử lý lịch.
 
 ## Về thư mục `node_modules`
 
-`npm install` tải các thư viện khai báo trong `package.json` cùng các thư viện mà chúng phụ thuộc
-(project này khoảng 180 gói). Thư mục này rất nặng nhưng chỉ là bản tải về, đã được `.gitignore`
-loại khỏi GitHub. **Không nộp hoặc nén kèm `node_modules`**; người khác chỉ cần chạy `npm install`.
+`npm install`
