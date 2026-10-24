@@ -1,6 +1,4 @@
--- Chay migration nay MOT LAN tren database clinic_appointment da co du lieu.
--- Khong xoa/sua lich hen cu. Them: tai khoan nhan vien, phien nhan vien,
--- cot xu ly lich hen, va hai bang tu van truc tuyen.
+
 USE clinic_appointment;
 
 CREATE TABLE IF NOT EXISTS staff_accounts (

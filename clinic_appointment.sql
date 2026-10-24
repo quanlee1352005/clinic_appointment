@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS services (
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 ) ENGINE=InnoDB;
 
--- Bang ket hop N-N: mot bac si cung cap nhieu dich vu va mot dich vu co the
+-- Bang ket hop : mot bac si cung cap nhieu dich vu va mot dich vu co the
 -- duoc nhieu bac si cung cap. Thoi luong/gia co the khac nhau theo bac si.
 CREATE TABLE IF NOT EXISTS doctor_services (
     doctor_id BIGINT UNSIGNED NOT NULL,
@@ -392,20 +392,3 @@ INSERT IGNORE INTO doctor_schedules
     (2, 5, '08:00:00', '17:00:00'),
     (2, 6, '08:00:00', '17:00:00'),
     (2, 7, '08:00:00', '17:00:00');
-
--- Vi du dat lich vao thu hai tuan toi: bo dau -- de chay.
--- SET @ngay_hen = DATE_ADD(CURDATE(), INTERVAL 1 DAY);
--- SET @ngay_hen = DATE_ADD(@ngay_hen,
---     INTERVAL ((9 - DAYOFWEEK(@ngay_hen)) % 7) DAY);
--- CALL sp_create_appointment(
---     1, 1, 1, TIMESTAMP(@ngay_hen, '09:00:00'), 'Kham lan dau'
--- );
-
--- Truy van xem lich hen kem ten benh nhan, bac si va dich vu.
--- SELECT a.appointment_id, a.start_at, a.end_at, a.status,
---        p.full_name AS patient, d.full_name AS doctor,
---        a.service_name_snapshot, a.price_snapshot
--- FROM appointments AS a
--- JOIN patients AS p ON p.patient_id = a.patient_id
--- JOIN doctors AS d ON d.doctor_id = a.doctor_id
--- ORDER BY a.start_at;

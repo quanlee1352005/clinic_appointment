@@ -1,5 +1,4 @@
--- Chay migration nay mot lan tren database clinic_appointment da co du lieu.
--- Migration khong xoa/sua lich hen cu.
+
 USE clinic_appointment;
 
 CREATE TABLE IF NOT EXISTS patient_accounts (
