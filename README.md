@@ -40,7 +40,7 @@ và trả lời tư vấn.
    DB_HOST=127.0.0.1
    DB_PORT=3306
    DB_USER=root
-   DB_PASSWORD=mat_khau_mysql_cua_ban
+   DB_PASSWORD=
    DB_NAME=clinic_appointment
    ```
 
